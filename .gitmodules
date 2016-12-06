@@ -1,0 +1,36 @@
+[submodule "Administration"]
+	path = Administration
+	url = https://github.com/symbiote-h2020/Administration.git
+[submodule "Search"]
+	path = Search
+	url = https://github.com/symbiote-h2020/Search.git
+[submodule "CoreResourceAccessMonitor"]
+	path = CoreResourceAccessMonitor
+	url = https://github.com/symbiote-h2020/CoreResourceAccessMonitor.git
+[submodule "CoreResourceMonitor"]
+	path = CoreResourceMonitor
+	url = https://github.com/symbiote-h2020/CoreResourceMonitor.git
+[submodule "CoreAuthenticationAuthorizationManager"]
+	path = CoreAuthenticationAuthorizationManager
+	url = https://github.com/symbiote-h2020/CoreAuthenticationAuthorizationManager.git
+[submodule "CoreInterface"]
+	path = CoreInterface
+	url = https://github.com/symbiote-h2020/CoreInterface.git
+[submodule "CloudCoreInterface"]
+	path = CloudCoreInterface
+	url = https://github.com/symbiote-h2020/CloudCoreInterface.git
+[submodule "EurekaService"]
+	path = EurekaService
+	url = https://github.com/symbiote-h2020/EurekaService.git
+[submodule "Registry"]
+	path = Registry
+	url = https://github.com/symbiote-h2020/Registry.git
+[submodule "CoreConfigProperties"]
+	path = CoreConfigProperties
+	url = https://github.com/symbiote-h2020/CoreConfigProperties.git
+[submodule "ZipkinService"]
+	path = ZipkinService
+	url = https://github.com/symbiote-h2020/ZipkinService.git
+[submodule "CoreConfigService"]
+	path = CoreConfigService
+	url = https://github.com/symbiote-h2020/CoreConfigService.git
