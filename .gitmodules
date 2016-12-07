@@ -25,9 +25,6 @@
 [submodule "Registry"]
 	path = Registry
 	url = https://github.com/symbiote-h2020/Registry.git
-[submodule "CoreConfigProperties"]
-	path = CoreConfigProperties
-	url = https://github.com/symbiote-h2020/CoreConfigProperties.git
 [submodule "ZipkinService"]
 	path = ZipkinService
 	url = https://github.com/symbiote-h2020/ZipkinService.git
