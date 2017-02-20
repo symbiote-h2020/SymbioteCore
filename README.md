@@ -5,7 +5,7 @@ symbIoTe is a mediator, an intermediary connecting applications and IoT platform
 
 ###Project Build & Deployment
 
-To retrieve, build and deploy the project in either domain (Core/Cloud), the process is the following:
+To retrieve, build and deploy the project, the process is the following:
 
  - Install RabbitMQ server:
   * RabbitMQ is a message queue framework (uses AMQP) that lets our services exchange informations and events.
@@ -26,7 +26,7 @@ To retrieve, build and deploy the project in either domain (Core/Cloud), the pro
    `git clone --recursive https://github.com/symbiote-h2020/SymbioteCore.git`
   * If you want to download the repos for development purposes, you need to clone them individually into separate folders
    * For the symbIoTe Core you need the components:
-    * CoreConfigService, Eureka, Zipkin, Administration, Registry, Search, ResourceMonitor, ResourceAccessMonitor, CoreAuthenticationAuthorizationManager, CoreInterface, CloudCoreInterface, CoreSecurityHandler (TB addeed)
+    * CoreConfigService, Eureka, Zipkin, Administration, Registry, Search, CoreResourceMonitor, CoreResourceAccessMonitor, CoreAuthenticationAuthorizationManager, CoreInterface, CloudCoreInterface, CoreSecurityHandler (To be addeed)
      
  - Build the components:
   * Remember to change the path in ConfigService bootstrap.properties if you have changed the ConfigProperties location
