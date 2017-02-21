@@ -1,6 +1,6 @@
 # symbIoTe Core
 
-symbIoTe is a mediator, an intermediary connecting applications and IoT platforms. The basic functionality is that of a registry service which lists platforms, their resources and properties, while also providing an way to map between the platforms' different APIs. 
+symbIoTe is a mediator, an intermediary connecting applications and IoT platforms. The basic functionality is that of a registry service which lists platforms, their resources and properties, while also providing a way to map between the platforms' different APIs. 
 
 
 ###Project Build & Deployment
@@ -19,17 +19,17 @@ To retrieve, build and deploy the project, the process is the following:
   * Details: https://www.mongodb.com/download-center  (step by step with APT for Ubuntu/Debian)
 
  - Clone the Config Properties repository:
-  * git clone the CoreConfigProperties repo to directory: `"{user.home}/git/symbiote/"`  (or any other you want, just make sure to change the path in CoreConfigService bootstrap.properties)
+  * git clone the [CoreConfigProperties](https://github.com/symbiote-h2020/CloudConfigProperties) repo to directory: `"{user.home}/git/symbiote/"`  (or any other you want, just make sure to change the path in CoreConfigService bootstrap.properties)
   
  - Clone the rest of the components:
   * If you just want to deploy but not develop/commit any changes, you can get all components straight from the superproject:
    `git clone --recursive https://github.com/symbiote-h2020/SymbioteCore.git`
   * If you want to download the repos for development purposes, you need to clone them individually into separate folders
    * For the symbIoTe Core you need the components:
-    * CoreConfigService, Eureka, Zipkin, Administration, Registry, Search, CoreResourceMonitor, CoreResourceAccessMonitor, CoreAuthenticationAuthorizationManager, CoreInterface, CloudCoreInterface, CoreSecurityHandler (To be addeed)
+    * *CoreConfigService*, *Eureka*, *Zipkin*, *Administration*, *Registry*, *Search*, *CoreResourceMonitor*, *CoreResourceAccessMonitor*, *CoreAuthenticationAuthorizationManager*, *CoreInterface*, *CloudCoreInterface*
      
  - Build the components:
-  * Remember to change the path in ConfigService bootstrap.properties if you have changed the ConfigProperties location
+  * Remember to change the path in *CoreConfigService* **bootstrap.properties** if you have changed the *CoreConfigProperties* location
   * Build everything using gradle:
     `gradle build`  (or `gradle build -x test` to skip tests)
   * Resulting jars are in build/libs directory
@@ -37,11 +37,11 @@ To retrieve, build and deploy the project, the process is the following:
     `java -jar build/libs/<component_name>.jar`
 
  - Run the services in order:
-  * Run ConfigService first
-  * Run EurekaService second
-  * Run ZipkinService third
+  * Run *CoreConfigService* first
+  * Run *EurekaService* second
+  * Run *ZipkinService* third
   * Run all remaining components in whichever order you like
-  * Check that they were deployed successfully in the Eureka panel: localhost:8761/
+  * Check that they were deployed successfully in the *Eureka* panel: localhost:8761/
 
 ## Accessing a resource
 
