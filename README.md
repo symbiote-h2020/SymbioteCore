@@ -43,7 +43,7 @@ To retrieve, build and deploy the project, the process is the following:
   * Run all remaining components in whichever order you like
   * Check that they were deployed successfully in the Eureka panel: localhost:8761/
 
-##3. Accessing a resource
+## Accessing a resource
 
 An application can use a resource by following these steps:
 
