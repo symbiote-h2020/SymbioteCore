@@ -26,7 +26,7 @@ To retrieve, build and deploy the project, the process is the following:
    `git clone --recursive https://github.com/symbiote-h2020/SymbioteCore.git`
   * If you want to download the repos for development purposes, you need to clone them individually into separate folders
    * For the symbIoTe Core you need the components:
-    * *CoreConfigService*, *Eureka*, *Zipkin*, *Administration*, *Registry*, *Search*, *CoreResourceMonitor*, *CoreResourceAccessMonitor*, *CoreAuthenticationAuthorizationManager*, *CoreInterface*, *CloudCoreInterface*
+     *CoreConfigService*, *Eureka*, *Zipkin*, *Administration*, *Registry*, *Search*, *CoreResourceMonitor*, *CoreResourceAccessMonitor*, *CoreAuthenticationAuthorizationManager*, *CoreInterface*, *CloudCoreInterface*
      
  - Build the components:
   * Remember to change the path in *CoreConfigService* **bootstrap.properties** if you have changed the *CoreConfigProperties* location
