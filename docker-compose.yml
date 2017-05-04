@@ -14,3 +14,9 @@ services:
     image: mongo
     ports:
       - 27017:27017
+  coreConfigService:
+    image: symbiote/coreconfigservice
+    ports:
+      - 8888:8888
+    volumes:
+      - ../CoreConfigProperties:/CoreConfigProperties
