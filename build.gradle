@@ -2,6 +2,7 @@ import com.bmuschko.gradle.docker.tasks.image.Dockerfile
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 
 apply plugin: 'base'
+
 buildscript {
 
   repositories {
@@ -26,7 +27,7 @@ subprojects {
 
   task createDockerfile(type: Dockerfile) {
     dependsOn assemble
-    from 'openjdk:8-alpine'
+    from 'symbiote/base'
 
     FileTree tree = fileTree(dir: jar.destinationDir, include: '*.jar')
     tree.visit {element ->
@@ -35,7 +36,6 @@ subprojects {
 
     destFile = project.file 'build/libs/Dockerfile'
     runCommand "touch /app.jar"
-    entryPoint "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
   }
 
   task buildDockerImage(type: DockerBuildImage) {
@@ -52,7 +52,15 @@ subprojects {
 
 project(':CoreConfigService') {
   createDockerfile {
+      entryPoint "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
       exposePort 8888
+  }
+}
+
+project(':EurekaService') {
+  createDockerfile {
+      exposePort 8761
+      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-timeout", "600s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
   }
 }
 
