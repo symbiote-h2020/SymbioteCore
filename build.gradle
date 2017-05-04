@@ -1,0 +1,58 @@
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
+apply plugin: 'base'
+buildscript {
+
+  repositories {
+    jcenter()
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+
+  dependencies {
+    classpath 'com.bmuschko:gradle-docker-plugin:3.0.6'
+  }
+}
+
+subprojects {
+  apply plugin: 'java'
+  apply plugin: com.bmuschko.gradle.docker.DockerRemoteApiPlugin
+
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
+
+
+  task createDockerfile(type: Dockerfile) {
+    dependsOn assemble
+    from 'openjdk:8-alpine'
+
+    FileTree tree = fileTree(dir: jar.destinationDir, include: '*.jar')
+    tree.visit {element ->
+      addFile element.file.name, "app.jar"
+    }
+
+    destFile = project.file 'build/libs/Dockerfile'
+    runCommand "touch /app.jar"
+    entryPoint "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
+  }
+
+  task buildDockerImage(type: DockerBuildImage) {
+    dependsOn createDockerfile
+    inputDir = createDockerfile.destFile.parentFile
+    tag = 'symbiote/' + jar.baseName.toLowerCase()
+  }
+
+  docker {
+    url = System.env["DOCKER_HOST"]
+    certPath = new File(System.env["DOCKER_CERT_PATH"])
+  }
+}
+
+task copyJars(type: Copy) {
+    from subprojects.collect { it.tasks.withType(Jar) }
+    into "$buildDir/libs"
+}
+
+assemble.dependsOn copyJars
