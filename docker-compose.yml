@@ -24,6 +24,11 @@ services:
     image: symbiote/eurekaservice
     ports:
       - 8761:8761
-      - 8080:8080
+    links:
+      - coreConfigService
+  zipkinService:
+    image: symbiote/zipkinservice
+    ports:
+      - 8762:8762
     links:
       - coreConfigService

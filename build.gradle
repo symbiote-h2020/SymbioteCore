@@ -64,6 +64,13 @@ project(':EurekaService') {
   }
 }
 
+project(':ZipkinService') {
+  createDockerfile {
+      exposePort 8762
+      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-wait", "tcp://eurekaService:8761", "-timeout", "600s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
+  }
+}
+
 task copyJars(type: Copy) {
     from subprojects.collect { it.tasks.withType(Jar) }
     into "$buildDir/libs"
