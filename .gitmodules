@@ -10,9 +10,6 @@
 [submodule "CoreResourceMonitor"]
 	path = CoreResourceMonitor
 	url = https://github.com/symbiote-h2020/CoreResourceMonitor.git
-[submodule "CoreAuthenticationAuthorizationManager"]
-	path = CoreAuthenticationAuthorizationManager
-	url = https://github.com/symbiote-h2020/CoreAuthenticationAuthorizationManager.git
 [submodule "CoreInterface"]
 	path = CoreInterface
 	url = https://github.com/symbiote-h2020/CoreInterface.git
@@ -31,3 +28,9 @@
 [submodule "CoreConfigService"]
 	path = CoreConfigService
 	url = https://github.com/symbiote-h2020/CoreConfigService.git
+[submodule "SemanticManager"]
+	path = SemanticManager
+	url = https://github.com/symbiote-h2020/SemanticManager.git
+[submodule "AuthenticationAuthorizationManager"]
+	path = AuthenticationAuthorizationManager
+	url = https://github.com/symbiote-h2020/AuthenticationAuthorizationManager.git
