@@ -61,3 +61,10 @@ services:
     links:
       - coreConfigService
       - eurekaService
+  coreresourceaccessmonitor:
+    image: symbiote/coreresourceaccessmonitor
+    ports:
+      - 8310:8310
+    links:
+      - coreConfigService
+      - eurekaService

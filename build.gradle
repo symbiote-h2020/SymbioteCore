@@ -99,6 +99,13 @@ project(':Registry') {
   }
 }
 
+project(':CoreResourceAccessMonitor') {
+  createDockerfile {
+      exposePort 8300
+      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-wait", "tcp://eurekaService:8761", "-wait", "tcp://zipkinService:8762", "-wait", "tcp://mongo:27017", "-timeout", "600s", "-wait-retry-interval", "3s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
+  }
+}
+
 task copyJars(type: Copy) {
     from subprojects.collect { it.tasks.withType(Jar) }
     into "$buildDir/libs"
