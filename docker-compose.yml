@@ -54,3 +54,10 @@ services:
     links:
       - coreConfigService
       - eurekaService
+  registry:
+    image: symbiote/registry
+    ports:
+      - 8200:8200
+    links:
+      - coreConfigService
+      - eurekaService

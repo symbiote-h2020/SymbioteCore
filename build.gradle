@@ -60,35 +60,42 @@ project(':CoreConfigService') {
 project(':EurekaService') {
   createDockerfile {
       exposePort 8761
-      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-timeout", "600s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
+      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-timeout", "600s", "-wait-retry-interval", "3s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
   }
 }
 
 project(':ZipkinService') {
   createDockerfile {
       exposePort 8762
-      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-wait", "tcp://eurekaService:8761", "-timeout", "600s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
+      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-wait", "tcp://eurekaService:8761", "-timeout", "600s", "-wait-retry-interval", "3s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
   }
 }
 
 project(':Administration') {
   createDockerfile {
       exposePort 8250
-      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-wait", "tcp://eurekaService:8761", "-wait", "tcp://zipkinService:8762", "-timeout", "600s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
+      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-wait", "tcp://eurekaService:8761", "-wait", "tcp://zipkinService:8762", "-timeout", "600s", "-wait-retry-interval", "3s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
   }
 }
 
 project(':CloudCoreInterface') {
   createDockerfile {
       exposePort 8101
-      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-wait", "tcp://eurekaService:8761", "-wait", "tcp://zipkinService:8762", "-timeout", "600s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
+      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-wait", "tcp://eurekaService:8761", "-wait", "tcp://zipkinService:8762", "-timeout", "600s", "-wait-retry-interval", "3s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
   }
 }
 
 project(':CoreInterface') {
   createDockerfile {
       exposePort 8100
-      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-wait", "tcp://eurekaService:8761", "-wait", "tcp://zipkinService:8762", "-timeout", "600s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
+      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-wait", "tcp://eurekaService:8761", "-wait", "tcp://zipkinService:8762", "-timeout", "600s", "-wait-retry-interval", "3s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
+  }
+}
+
+project(':Registry') {
+  createDockerfile {
+      exposePort 8100
+      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-wait", "tcp://eurekaService:8761", "-wait", "tcp://zipkinService:8762", "-wait", "tcp://mongo:27017", "-timeout", "600s", "-wait-retry-interval", "3s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
   }
 }
 
