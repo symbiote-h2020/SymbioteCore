@@ -33,13 +33,13 @@ services:
     links:
       - coreConfigService
       - eurekaService
-  # administration:
-  #   image: symbiote/administration
-  #   ports:
-  #     - 8250:8250
-  #   links:
-  #     - coreConfigService
-  #     - eurekaService
+  administration:
+    image: symbiote/administration
+    ports:
+      - 8250:8250
+    links:
+      - coreConfigService
+      - eurekaService
   cloudCoreInterface:
     image: symbiote/cloudcoreinterface
     ports:
