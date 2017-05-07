@@ -68,3 +68,12 @@ services:
     links:
       - coreConfigService
       - eurekaService
+  search:
+    image: symbiote/search
+    ports:
+      - 8120:8120
+    volumes:
+      - ./build/jena:/root/coreSearchTriplestore
+    links:
+      - coreConfigService
+      - eurekaService
