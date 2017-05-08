@@ -1,0 +1,506 @@
+# for building we need to have installed:
+## jdk 8
+## gradle 3.x
+
+# for docker we need to have Docker toolbox installed
+
+> mkdir symbiote
+> cd symbiote
+
+> mkdir core
+> cd core
+> git clone --recursive https://github.com/symbiote-h2020/SymbioteCore.git
+> git clone https://github.com/symbiote-h2020/CoreConfigProperties.git
+> cd ..
+
+> mkdir cloud
+> cd cloud
+> git clone --recursive https://github.com/symbiote-h2020/SymbioteCloud.git
+> git clone https://github.com/symbiote-h2020/CloudConfigProperties.git
+> cd ..
+
+Directory structure:
+.
+└── core
+    ├── CoreConfigProperties
+    └── SymbioteCore
+        ├── Administration
+        ├── CloudCoreInterface
+        ├── CoreAuthenticationAuthorizationManager
+        ├── CoreConfigService
+        ├── CoreInterface
+        ├── CoreResourceAccessMonitor
+        ├── CoreResourceMonitor
+        ├── EurekaService
+        ├── Registry
+        ├── Search
+        └── ZipkinService
+
+########################
+creating docker machine for core
+
+> docker-machine create --driver virtualbox --virtualbox-memory "5120" core
+
+# starting core machine
+> docker-machine start core
+
+# setting environment in terminal
+> eval $(docker-machine env core)
+
+# getting IP address of core
+> docker-machine ip core
+192.168.99.101
+
+# this IP address is used in accessing core components
+
+# creating symbiote/base image
+> docker build --tag symbiote/base .
+
+# Remove all stopped containers
+> docker rm $(docker ps -a -q)
+
+# remove all untagged (<none>) images
+# Linux
+> docker rmi $(docker images | grep "^<none>" | awk '{print $3}')
+# Mac
+> docker rmi $(docker images | grep "^<none>" | gawk '{print $3}')
+
+##
+# build all subprojects
+> gradle clean build -x test
+
+
+# build all images
+> gradle buildDockerImage
+
+
+# starting core
+> docker-compose up
+
+# stopping core
+# press CTRL-C or in terminal
+> docker-compose down
+
+########################
+# rabbitmq
+
+# docker-compose configuration
+rabbitmq:
+  image: rabbitmq:3-management
+  restart: always
+  ports:
+    - 15672:15672
+    - 5672:5672
+  logging:
+    options:
+      max-size: "10m"
+      max-file: "10"
+
+  # checking if rabbitmq is started - open management http://192.168.99.100:15672/
+    # username: guest
+    # password: guest
+
+#######################
+# mongo db
+
+# docker-compose configuration
+mongo:
+  image: mongo
+  ports:
+    - 27017:27017
+
+
+############################
+# starting CORE components
+############################
+
+1. CoreConfigService : port 8888
+2. EurekaService : port 8761
+3. ZipkinService : port 8762
+
+Other components:
+Administration : port 8250
+CloudCoreInterface : port 8101
+CoreInterface : port 8100
+Registry : port 8200
+CoreResourceAccessMonitor : port 8310
+Search : port 8120
+
+############################
+### CoreConfigService : 8888
+
+# docker-compose configuration
+coreConfigService:
+  image: symbiote/coreconfigservice
+  ports:
+    - 8888:8888
+  volumes:
+    - ../CoreConfigProperties:/CoreConfigProperties
+
+
+> cd CoreConfigProperties
+# in file application.properties change rabbitmq config to
+rabbit.host=rabbitmq
+rabbit.username=guest
+rabbit.password=guest
+
+
+# added file src/main/resources/bootstrap-docker.properties
+spring.cloud.config.server.git.uri=file://../CoreConfigProperties
+server.port=8888
+  # this is for getting config from specified branch
+spring.cloud.config.server.git.default-label=docker
+
+# in SymbioteCore build.gradle added
+project(':CoreConfigService') {
+  createDockerfile {
+      entryPoint "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
+      exposePort 8888
+  }
+}
+
+# building project
+> gradle :CoreConfigService:clean :CoreConfigService:build -x test
+
+# build docker image
+> gradle :CoreConfigService:clean :CoreConfigService:buildDockerImage
+
+# starting system
+> docker-compose up
+
+# for check go to URL http://192.168.99.100:8888/Registry/default
+# result should contain "rabbit.host": "rabbitmq"
+
+######################
+# EurekaService : 8761
+
+# docker-compose configuration
+eurekaService:
+  image: symbiote/eurekaservice
+  ports:
+    - 8761:8761
+  links:
+    - coreConfigService
+
+# in CoreConfigService in application.properties add
+eureka.client.serviceUrl.defaultZone=http://eurekaService:8761/eureka
+
+
+# added file src/main/resources/bootstrap-docker.properties
+spring.cloud.config.uri=http://coreConfigService:8888
+spring.application.name=EurekaService
+
+# in SymbioteCore build.gradle added
+project(':EurekaService') {
+  createDockerfile {
+      exposePort 8761
+      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-timeout", "600s", "-wait-retry-interval", "3s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
+  }
+}
+
+# build docker image
+> gradle :EurekaService:clean :EurekaService:buildDockerImage
+
+# for check go to URL na http://192.168.99.100:8761
+
+######################
+# ZipkinService : 8762
+
+# docker-compose configuration
+zipkinService:
+  image: symbiote/zipkinservice
+  ports:
+    - 8762:8762
+  links:
+    - coreConfigService
+
+# added file src/main/resources/bootstrap-docker.properties
+spring.application.name=ZipkinService
+spring.cloud.config.uri=http://coreConfigService:8888
+
+
+# in CoreConfigService in application.properties change
+spring.zipkin.base-url=http://zipkinService:8762
+
+# in SymbioteCore build.gradle added
+project(':ZipkinService') {
+  createDockerfile {
+      exposePort 8762
+      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-wait", "tcp://eurekaService:8761", "-timeout", "600s", "-wait-retry-interval", "3s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
+  }
+}
+
+# build docker image
+> gradle :ZipkinService:clean :ZipkinService:buildDockerImage
+
+
+# starting system
+> docker-compose up
+
+# for check go to URL na http://192.168.99.100:8762
+
+#######################
+# Administration : 8250
+
+# docker-compose configuration
+administration:
+  image: symbiote/administration
+  ports:
+    - 8250:8250
+  links:
+    - coreConfigService
+    - eurekaService
+
+# added file src/main/resources/bootstrap-docker.properties
+spring.application.name=Administration
+spring.cloud.config.uri=http://coreConfigService:8888
+logging.file=logs/Administration.log
+
+spring.thymeleaf.cache = false
+
+# in SymbioteCore build.gradle added
+project(':Administration') {
+  createDockerfile {
+      exposePort 8250
+      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-wait", "tcp://eurekaService:8761", "-wait", "tcp://zipkinService:8762", "-timeout", "600s", "-wait-retry-interval", "3s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
+  }
+}
+
+# build docker image
+> gradle :Administration:clean :Administration:buildDockerImage
+
+
+# starting system
+> docker-compose up
+
+# for check go to URL na http://192.168.99.100:8250
+
+###########################
+# CloudCoreInterface : 8101
+
+# docker-compose configuration
+cloudCoreInterface:
+  image: symbiote/cloudcoreinterface
+  ports:
+    - 8101:8101
+  links:
+    - coreConfigService
+    - eurekaService
+
+# added file src/main/resources/bootstrap-docker.properties
+spring.application.name=CloudCoreInterface
+spring.cloud.config.uri=http://coreConfigService:8888
+logging.file=logs/CloudCoreInterface.log
+
+# in SymbioteCore build.gradle added
+project(':CloudCoreInterface') {
+  createDockerfile {
+      exposePort 8101
+      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-wait", "tcp://eurekaService:8761", "-wait", "tcp://zipkinService:8762", "-timeout", "600s", "-wait-retry-interval", "3s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
+  }
+}
+
+# build docker image
+> gradle :CloudCoreInterface:clean :CloudCoreInterface:buildDockerImage
+
+
+# starting system
+> docker-compose up
+
+######################
+# CoreInterface : 8100
+
+# docker-compose configuration
+cloudCoreInterface:
+  image: symbiote/cloudcoreinterface
+  ports:
+    - 8100:8100
+  links:
+    - coreConfigService
+    - eurekaService
+
+# added file src/main/resources/bootstrap-docker.properties
+spring.application.name=CoreInterface
+spring.cloud.config.uri=http://coreConfigService:8888
+logging.file=logs/CoreInterface.log
+
+# in SymbioteCore build.gradle added
+project(':CoreInterface') {
+  createDockerfile {
+      exposePort 8100
+      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-wait", "tcp://eurekaService:8761", "-wait", "tcp://zipkinService:8762", "-timeout", "600s", "-wait-retry-interval", "3s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
+  }
+}
+
+# build docker image
+> gradle :CoreInterface:clean :CoreInterface:buildDockerImage
+
+
+# starting system
+> docker-compose up
+
+#################
+# Registry : 8200
+
+# docker-compose configuration
+registry:
+  image: symbiote/registry
+  ports:
+    - 8200:8200
+  links:
+    - coreConfigService
+    - eurekaService
+
+# added file src/main/resources/bootstrap-docker.properties
+spring.application.name=Registry
+spring.cloud.config.uri=http://coreConfigService:8888
+logging.file=logs/Registry.log
+rabbit.host=localhost
+rabbit.username=guest
+rabbit.password=guest
+
+# CoreConfigProperties in Registry.properties
+# commented out
+#symbiote.registry.mongo.host=localhost
+# added
+spring.data.mongodb.host=mongo
+spring.data.mongodb.database=symbiote-core-database
+
+?????? AppConfig.java commented out some parts
+?????? there was mongo connection error while starting registry because spring.data.mongodb.host was not set
+class AppConfig /*extends AbstractMongoConfiguration*/ {
+/*
+    @Value("${symbiote.registry.mongo.dbname}")
+    private String databaseName;
+
+    @Value("${symbiote.registry.mongo.host}")
+    private String mongoHost;
+
+    @Override
+    protected String getDatabaseName() {
+        return databaseName;
+    }
+
+    @Override
+    public Mongo mongo() throws Exception {
+        return new Mongo();
+    }
+
+    //TODO change 'localhost' in MongoClient to sth read from configuration
+    @Bean
+    public MongoTemplate mongoTemplate() throws Exception {
+        return new MongoTemplate(new MongoClient(mongoHost), getDatabaseName());
+    }
+*/
+}
+
+# in SymbioteCore build.gradle added
+project(':Registry') {
+  createDockerfile {
+      exposePort 8200
+      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-wait", "tcp://eurekaService:8761", "-wait", "tcp://zipkinService:8762", "-wait", "tcp://mongo:27017", "-timeout", "600s", "-wait-retry-interval", "3s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
+  }
+}
+
+# build docker image
+> gradle :Registry:clean :Registry:buildDockerImage
+
+
+#################
+# CoreResourceAccessMonitor : 8310
+
+# docker-compose configuration
+coreresourceaccessmonitor:
+  image: symbiote/coreresourceaccessmonitor
+  ports:
+    - 8310:8310
+  links:
+    - coreConfigService
+    - eurekaService
+
+# added file src/main/resources/bootstrap-docker.properties
+spring.application.name=CoreResourceAccessMonitor
+spring.cloud.config.uri=http://coreConfigService:8888
+logging.file=logs/CoreResourceAccessMonitor.log
+rabbit.host=localhost
+rabbit.username=guest
+rabbit.password=guest
+
+# CoreConfigProperties in CoreResourceAccessMonitor.properties
+# added
+spring.data.mongodb.host=mongo
+spring.data.mongodb.database=symbiote-core-cram-database
+
+
+# AppConfig changed to
+@Configuration
+@EnableMongoRepositories
+class AppConfig /* extends AbstractMongoConfiguration*/ {
+/*
+    @Override
+    protected String getDatabaseName() {
+        return "symbiote-core-cram-database";
+    }
+
+    @Override
+    public Mongo mongo() throws Exception {
+        return new Mongo();
+    }
+
+    @Override
+    protected String getMappingBasePackage() {
+        return "com.oreilly.springdata.mongodb";
+    }
+*/
+}
+
+# in SymbioteCore build.gradle added
+project(':CoreResourceAccessMonitor') {
+  createDockerfile {
+      exposePort 8310
+      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-wait", "tcp://eurekaService:8761", "-wait", "tcp://zipkinService:8762", "-wait", "tcp://mongo:27017", "-timeout", "600s", "-wait-retry-interval", "3s", "java", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
+  }
+}
+
+# build docker image
+> gradle :CoreResourceAccessMonitor:clean :CoreResourceAccessMonitor:buildDockerImage
+
+###############
+# Search : 8120
+
+# docker-compose configuration
+search:
+  image: symbiote/search
+  ports:
+    - 8120:8120
+  links:
+    - coreConfigService
+    - eurekaService
+
+# added file src/main/resources/bootstrap-docker.properties
+spring.application.name=Search
+spring.cloud.config.uri=http://coreConfigService:8888
+logging.file=logs/Search.log
+logging.level.eu.h2020.symbiote=DEBUG
+
+
+# there is problem with using mapped files in docker look for https://github.com/stain/jena-docker/issues/1
+# that is the reason why TripleStore is changed to use direct mode
+# changes are in git commit 84b1d2a40a574e976ebceac64967519086bc6d80 in Search project docker branch
+
+# in SymbioteCore build.gradle added
+project(':Search') {
+  createDockerfile {
+      exposePort 8120
+      entryPoint "dockerize", "-wait", "tcp://coreConfigService:8888", "-wait", "tcp://eurekaService:8761", "-wait", "tcp://zipkinService:8762", "-timeout", "600s", "-wait-retry-interval", "3s", "java", "-noverify", "-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=docker", "-jar", "/app.jar"
+  }
+}
+
+
+# build docker image
+> gradle :Search:clean :Search:buildDockerImage
+
+
+# this was used for testing
+> docker-compose run --entrypoint /bin/sh search
+>> java -noverify -Dspring.profiles.active=docker -jar /app.jar --debug
