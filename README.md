@@ -1,4 +1,4 @@
- symbIoTe Core
+# SymbIoTe Core
 
 symbIoTe is a mediator, an intermediary connecting applications and IoT platforms. The basic functionality is that of a registry service which lists platforms, their resources and properties, while also providing an way to map between the platforms' different APIs. 
 
