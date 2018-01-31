@@ -47,7 +47,7 @@ You need to create a PKCS12 keystore containing a certificate:
 * with CA property enabled
 *  with the following encryption params
    * SIGNATURE_ALGORITHM=SHA256withECDSA
-   * CURVE_NAME=secp256r
+   * CURVE_NAME=secp256r1
    * KEY_PAIR_GEN_ALGORITHM=ECDSA
 * with the CN value set according to AAMConstants.java field CORE_AAM_INSTANCE_ID value (e.g. currently SymbIoTe_Core_AAM)
 * with the certificate entry name "symbiote_core_aam"
