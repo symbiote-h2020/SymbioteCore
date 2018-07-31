@@ -1,0 +1,4 @@
+hostname=<hostname.without.slashes.and.protocol>
+aam.owner=<owner.of.aam>
+aam.password=<password.for.aam>
+ssl.password=<password.for.generated.p12.certificate>

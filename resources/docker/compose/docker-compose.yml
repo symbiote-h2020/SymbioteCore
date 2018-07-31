@@ -1,0 +1,45 @@
+version: "3"
+services:
+  symbiote-mongo:
+    image: mongo:3.6
+    hostname: symbiote-mongo
+    networks:
+      - symbiote
+    volumes:
+      - symbiote-mongo-vol:/data/db
+    ports:
+      - 27017:27017
+  symbiote-rabbitmq:
+    image: rabbitmq:3-management-alpine
+    hostname: symbiote-rabbitmq
+    networks:
+      - symbiote
+    ports:
+      - 5672:5672
+      - 15672:15672
+  symbiote-apache:
+    image: symbiote-apache
+    hostname: symbiote-apache
+    networks:
+      - symbiote
+    ports:
+      - 80:80
+      - 443:443
+  symbiote-core:
+    image: symbiote-core
+    networks:
+      - symbiote
+    ports:
+      - 8100:8100
+      - 8101:8101 
+      - 8250:8250
+      - 8443:8443
+      - 8777:8777
+    volumes:
+      - symbiote-triplestore-vol:/home/coreSearchTriplestore
+networks:
+  symbiote:
+volumes:
+  symbiote-mongo-vol:
+  symbiote-triplestore-vol:
+  

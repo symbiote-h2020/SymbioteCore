@@ -1,0 +1,7 @@
+1. Update values in configuration/config.txt to your preferences (hostname should be entered without any protocol and slashes, e.g. symbiote-open.man.poznan.pl, other parameters can be any strings; certificate password is a NEW password for a p12 certificate that will be generated from .pem files)
+2. Put your server certificate (cert.pem, privkey.pem, chain.pem and fullchain.pem) in configuration/cert directory; the easiest way to get an SSL certificate is by using 'Let's encrypt' service
+3. Run ./buildAll.sh to build all required images
+4. If you're not running docker swarm yet, execute 'docker swarm init'
+5. Run symbioteCoreStart.sh to run all services
+6. Run symbioteCoreStop.sh to stop all services
+7. To get logs of each service, connect to container running symbiote-core (docker exec -it <container_name> bash). Log of each component can be accessed in each component's home directory as a screen.log file or by reattaching to a running screen session (screen -r <component_name>).
