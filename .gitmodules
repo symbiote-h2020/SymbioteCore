@@ -34,3 +34,6 @@
 [submodule "AuthenticationAuthorizationManager"]
 	path = AuthenticationAuthorizationManager
 	url = https://github.com/symbiote-h2020/AuthenticationAuthorizationManager.git
+[submodule "BarteringAndTrading"]
+	path = BarteringAndTrading
+	url = https://github.com/symbiote-h2020/BarteringAndTrading
