@@ -184,8 +184,7 @@ https://<yourCAAMHostname>:<selected port>/get_component_certificate/platform/Sy
 #### Veryfing that CoreInterface is working
 Verify all is ok by going to:
 ```
-https://<yourCoreInterfaceHostname>:8100/coreInterface/v1/get_component_certificate/platform/SymbIoTe_Core_
-AAM/component/aam
+https://<yourCoreInterfaceHostname>/aam/get_component_certificate/platform/SymbIoTe_Core_AAM/component/aam
 ```
 There you should see the connection green and the content is Core AAM instance's certificate in PEM format.
 
