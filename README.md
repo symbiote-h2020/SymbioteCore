@@ -2,6 +2,12 @@
 
 symbIoTe is a mediator, an intermediary connecting applications and IoT platforms. The basic functionality is that of a registry service which lists platforms, their resources and properties, while also providing a way to map between the platforms' different APIs. 
 
+## Interworking Interface Documentation
+There are 2 kinds of interworking interfaces in the SymbIoTe Core:
+* The _coreInterface_ which serves northbound traffic coming from 3rd parties (e.g. applications searching for resources).
+ The interface description can be found [here](https://symbiote-h2020.github.io/SymbioteCore/coreInterface/)
+* The _cloudCoreInterface_ which serves southbound traffic coming from IoT platforms (e.g. applications). The interface description can be found [here](https://symbiote-h2020.github.io/SymbioteCore/cloudCoreInterface/)
+
 ## Project Build & Deployment
 
 ###  Install [Java Runtime Environment](https://java.com/download) 
