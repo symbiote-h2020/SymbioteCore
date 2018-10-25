@@ -1,0 +1,231 @@
+version: "3.5"
+
+x-environment:
+  &default-environment
+#### Uncomment and configure the following if you are behind a proxy
+#  - JAVA_HTTP_PROXY=-Dhttp.proxyHost=TODO -Dhttp.proxyPort=TODO
+#  - JAVA_HTTPS_PROXY=-Dhttps.proxyHost=TODO -Dhttps.proxyPort=TODO
+#  - JAVA_SOCKS_PROXY=-DsocksProxyHost=TODO -DsocksProxyPort=TODO
+#  - JAVA_NON_PROXY_HOSTS=-Dhttp.nonProxyHosts=*symbiote-h2020.eu|symbiote-coreconfig|symbiote-aam|symbiote-eureka
+  - _JAVA_OPTIONS=$JAVA_HTTP_PROXY $JAVA_HTTPS_PROXY $JAVA_NON_PROXY_HOSTS -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxRAMFraction=1
+services:
+  symbiote-rabbitmq:
+    image: rabbitmq:3-alpine
+    networks: 
+      - symbiote
+    ports:
+      - 5671:5671
+      - 5672:5672
+  symbiote-mongo:
+    image: mongo:3.6
+    networks: 
+      - symbiote
+    volumes:
+      - symbiote-core-vol:/data/db
+  symbiote-coreconfig:
+    image: symbioteh2020/symbiote-coreconfig:3.0.3
+    deploy:
+     resources:
+       limits:
+         memory: 750M
+    networks: 
+      - symbiote
+    ports:
+      - 8888:8888
+    secrets:
+      - source: coreconfigconfig 
+        target: /home/application-custom.properties
+    environment: *default-environment
+  symbiote-aam:
+    image: symbioteh2020/symbiote-aam
+    depends_on:
+      - symbiote-rabbitmq
+      - symbiote-mongo
+      - symbiote-coreconfig
+    deploy:
+     resources:
+       limits:
+         memory: 350M
+    networks: 
+      - symbiote
+    secrets:
+      - source: aambootstrapconfig
+        target: /home/bootstrap.properties
+      - source: aamkeystore
+        target: /home/core.p12
+    environment: *default-environment
+  symbiote-eureka:
+    image: symbioteh2020/symbiote-eureka
+    deploy:
+     resources:
+       limits:
+         memory: 350M
+    networks: 
+      - symbiote
+    ports:
+      - 8761:8761
+    secrets:
+      - source: eurekaconfig
+        target: /home/bootstrap.properties
+  symbiote-admin:
+    image: symbioteh2020/symbiote-admin:3.1.5
+    depends_on:
+      - symbiote-aam
+    deploy:
+     resources:
+       limits:
+         memory: 350M
+    networks:
+      - symbiote
+    secrets:
+      - source: adminconfig
+        target: /home/bootstrap.properties
+    environment: *default-environment
+  symbiote-coreinterface:
+    image: symbioteh2020/symbiote-coreinterface:3.0.2
+    depends_on:
+      - symbiote-aam
+    deploy:
+     resources:
+       limits:
+         memory: 350M
+    networks:
+      - symbiote
+    secrets:
+      - source: ciconfig
+        target: /home/bootstrap.properties
+    environment: *default-environment
+  symbiote-cloudcoreinterface:
+    image: symbioteh2020/symbiote-cloudcoreinterface:3.0.2
+    depends_on:
+      - symbiote-aam
+    deploy:
+     resources:
+       limits:
+         memory: 350M
+    networks:
+      - symbiote
+    secrets:
+      - source: cciconfig
+        target: /home/bootstrap.properties
+    environment: *default-environment
+  symbiote-cram:
+    image: symbioteh2020/symbiote-cram:3.0.2
+    depends_on:
+      - symbiote-aam
+    deploy:
+     resources:
+       limits:
+         memory: 350M
+    networks: 
+      - symbiote
+    secrets:
+      - source: cramconfig
+        target: /home/bootstrap.properties
+    environment: *default-environment
+  symbiote-crm:
+    image: symbioteh2020/symbiote-crm:3.0.1
+    depends_on:
+      - symbiote-aam
+    deploy:
+     resources:
+       limits:
+         memory: 350M
+    networks: 
+      - symbiote
+    secrets:
+      - source: crmconfig
+        target: /home/bootstrap.properties
+    environment: *default-environment
+  symbiote-registry:
+    image: symbioteh2020/symbiote-registry:3.0.3
+    depends_on:
+      - symbiote-aam
+    deploy:
+     resources:
+       limits:
+         memory: 350M
+    networks: 
+      - symbiote
+    secrets:
+      - source: registryconfig
+        target: /home/bootstrap.properties
+    environment: *default-environment
+  symbiote-search:
+    image: symbioteh2020/symbiote-search:3.0.3
+    depends_on:
+      - symbiote-aam
+    deploy:
+     resources:
+       limits:
+         memory: 350M
+    networks: 
+      - symbiote
+    secrets:
+      - source: searchconfig
+        target: /home/bootstrap.properties
+    environment: *default-environment
+  symbiote-semanticmanager:
+    image: symbioteh2020/symbiote-semanticmanager:3.0.1
+    depends_on:
+      - symbiote-aam
+    deploy:
+     resources:
+       limits:
+         memory: 350M
+    networks: 
+      - symbiote
+    secrets:
+      - source: smconfig
+        target: /home/bootstrap.properties
+    environment: *default-environment
+  symbiote-bt:
+    image: symbioteh2020/symbiote-bt:latest
+    command: sh -c 'java -DSPRING_BOOT_WAIT_FOR_SERVICES=symbiote-coreinterface:8100 -Xmx1024m -Duser.home=/home -Dspring.output.ansi.enabled=NEVER -jar $$(ls *run.jar)'
+    depends_on:
+      - symbiote-aam
+    deploy:
+     resources:
+       limits:
+         memory: 350M
+    networks: 
+      - symbiote
+    secrets:
+      - source: btconfig
+        target: /home/bootstrap.properties
+    environment: *default-environment
+
+networks:
+  symbiote:
+    name: symbiote
+volumes:
+  symbiote-core-vol:
+secrets:
+  coreconfigconfig:
+    file: ./configuration/CoreConfigProperties/application.properties
+  eurekaconfig:
+    file: ./configuration/bootstrap.properties
+  aambootstrapconfig:
+    file: ./configuration/AuthenticationAuthorizationManager/bootstrap.properties
+  aamkeystore:
+    file: ./configuration/core.p12
+  adminconfig:
+    file: ./configuration/bootstrap.properties
+  ciconfig:
+    file: ./configuration/CoreInterface/bootstrap.properties
+  cciconfig:
+    file: ./configuration/bootstrap.properties
+  cramconfig:
+    file: ./configuration/bootstrap.properties
+  crmconfig:
+    file: ./configuration/bootstrap.properties
+  registryconfig:
+    file: ./configuration/bootstrap.properties
+  searchconfig:
+    file: ./configuration/bootstrap.properties
+  smconfig:
+    file: ./configuration/bootstrap.properties
+  btconfig:
+    file: ./configuration/bootstrap.properties
+
+

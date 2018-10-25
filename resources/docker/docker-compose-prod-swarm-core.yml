@@ -1,0 +1,41 @@
+version: "3.5"
+services:
+  symbiote-nginx:
+    image: symbioteh2020/symbiote-nginx
+    ports: 
+      - 443:443
+    networks: 
+      - symbiote
+    secrets:
+      - source: nginxngrok
+        target: /home/nginx-ngrok.conf
+      - source: nginxprod
+        target: /home/nginx-prod.conf
+      - source: nginxfullchaincert
+        target: /certificates/fullchain.pem
+      - source: nginxprivkeycert
+        target: /certificates/privkey.pem
+    environment:
+      - SYMBIOTE_ENV=prod
+    depends_on:
+      - symbiote-admin
+      - symbiote-aam
+      - symbiote-cloudcoreinterface
+      - symbiote-coreinterface
+      - symbiote-cram
+      - symbiote-crm
+      - symbiote-monitor
+      - symbiote-bt
+      - symbiote-registry
+      - symbiote-search
+      - symbiote-semanticmanager
+
+secrets:
+  nginxngrok:
+    file: ./configuration/nginx-ngrok.conf
+  nginxprod:
+    file: ./configuration/nginx-prod.conf
+  nginxfullchaincert:
+    file: ./configuration/nginx-certificates/fullchain.pem
+  nginxprivkeycert:
+    file: ./configuration/nginx-certificates/privkey.pem
