@@ -24,6 +24,7 @@ services:
     volumes:
       - symbiote-core-vol:/data/db
   symbiote-coreconfig:
+    environment: *default-environment
     image: symbioteh2020/symbiote-coreconfig:3.0.5
     deploy:
       resources:
@@ -35,8 +36,8 @@ services:
       - symbiote-vol-config:/home/CoreConfigProperties
     ports:
       - 8888:8888
-    environment: *default-environment
   symbiote-aam:
+    environment: *default-environment
     image: symbioteh2020/symbiote-aam:5.0.12
     depends_on:
       - symbiote-rabbitmq
@@ -53,21 +54,22 @@ services:
         target: /home/bootstrap.properties
       - source: aamkeystore
         target: /home/core.p12
+  symbiote-eureka:
     environment: *default-environment
-    symbiote-eureka:
-      image: symbioteh2020/symbiote-eureka:3.0.2
-      deploy:
-       resources:
-         limits:
-           memory: 400M
-      networks:
-        - symbiote
-      ports:
-        - 8761:8761
-      secrets:
-        - source: eurekaconfig
-          target: /home/bootstrap.properties
+    image: symbioteh2020/symbiote-eureka:3.0.2
+    deploy:
+      resources:
+        limits:
+          memory: 400M
+    networks:
+      - symbiote
+    ports:
+      - 8761:8761
+    secrets:
+      - source: eurekaconfig
+        target: /home/bootstrap.properties
   symbiote-admin:
+    environment: *default-environment
     image: symbioteh2020/symbiote-admin:3.1.6
     depends_on:
       - symbiote-aam
@@ -80,8 +82,8 @@ services:
     secrets:
       - source: adminconfig
         target: /home/bootstrap.properties
-    environment: *default-environment
   symbiote-coreinterface:
+    environment: *default-environment
     image: symbioteh2020/symbiote-coreinterface:3.0.3
     depends_on:
       - symbiote-aam
@@ -94,8 +96,8 @@ services:
     secrets:
       - source: ciconfig
         target: /home/bootstrap.properties
-    environment: *default-environment
   symbiote-cloudcoreinterface:
+    environment: *default-environment
     image: symbioteh2020/symbiote-cloudcoreinterface:3.0.3
     depends_on:
       - symbiote-aam
@@ -108,8 +110,8 @@ services:
     secrets:
       - source: cciconfig
         target: /home/bootstrap.properties
-    environment: *default-environment
   symbiote-cram:
+    environment: *default-environment
     image: symbioteh2020/symbiote-cram:3.0.6
     depends_on:
       - symbiote-aam
@@ -122,8 +124,8 @@ services:
     secrets:
       - source: cramconfig
         target: /home/bootstrap.properties
-    environment: *default-environment
   symbiote-crm:
+    environment: *default-environment
     image: symbioteh2020/symbiote-crm:3.0.2
     depends_on:
       - symbiote-aam
@@ -136,8 +138,8 @@ services:
     secrets:
       - source: crmconfig
         target: /home/bootstrap.properties
-    environment: *default-environment
   symbiote-registry:
+    environment: *default-environment
     image: symbioteh2020/symbiote-registry:3.0.4
     depends_on:
       - symbiote-aam
@@ -150,8 +152,8 @@ services:
     secrets:
       - source: registryconfig
         target: /home/bootstrap.properties
-    environment: *default-environment
   symbiote-search:
+    environment: *default-environment
     image: symbioteh2020/symbiote-search:3.0.13
     depends_on:
       - symbiote-aam
@@ -166,8 +168,8 @@ services:
     secrets:
       - source: searchconfig
         target: /home/bootstrap.properties
-    environment: *default-environment
   symbiote-semanticmanager:
+    environment: *default-environment
     image: symbioteh2020/symbiote-semanticmanager:3.0.3
     depends_on:
       - symbiote-aam
@@ -180,9 +182,9 @@ services:
     secrets:
       - source: smconfig
         target: /home/bootstrap.properties
-    environment: *default-environment
   symbiote-bt:
-    image: symbioteh2020/symbiote-bt:3.0.2
+    environment: *default-environment
+    image: symbioteh2020/symbiote-bt:3.0.5
     command: sh -c 'java -DSPRING_BOOT_WAIT_FOR_SERVICES=symbiote-coreinterface:8100 -Xmx1024m -Duser.home=/home -Dspring.output.ansi.enabled=NEVER -jar $$(ls *run.jar)'
     depends_on:
       - symbiote-aam
@@ -195,7 +197,6 @@ services:
     secrets:
       - source: btconfig
         target: /home/bootstrap.properties
-    environment: *default-environment
 
 networks:
   symbiote:
